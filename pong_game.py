@@ -1,13 +1,16 @@
-from typing import Callable, List, Optional, Tuple, Union, Dict, Any
+import logging
+import math as mh
+import random as rd
+import webbrowser as wb
+from typing import Callable, List, Optional, Tuple, Union
+
 import pygame as pg
 
-from assets.source.switch_case import switch, case
 from assets.images import sprite_sheet as sp_sh
 from assets.sounds import sounds
-import random as rd
-import math as mh
-import logging
-import webbrowser as wb
+from assets.source.switch_case import switch, case
+
+from client import Client
 
 pg.display.init()
 
@@ -33,6 +36,7 @@ class App:
     fps = 30
 
     def __init__(self):
+        self.client = Client()
         self.game = Game(self)
         self.menu = Menu(self)
         self.tutorial = Tutorial(self)
@@ -108,7 +112,7 @@ class App:
         mouse_pos = self.get_mouse_pos()
         for key in range(3):
             if pressed[key]:
-                self.scene.handle_mouse_press(key, mouse_pos)
+                self.scene.handle_mouse_press(key, (int(mouse_pos[0]), int(mouse_pos[1])))
 
     def get_mouse_pos(self):
         return pg.mouse.get_pos()[0] // self.scene_scale[0], pg.mouse.get_pos()[1] // self.scene_scale[1]
@@ -283,7 +287,7 @@ class BallGoal:
 
 class Scene:
     app = None
-    settings = {"size": (0, 0), "scale": (0, 0), "title": "", "icon": None}
+    settings = {"size": (0, 0), "scale": (0, 0), "title": "", "icon": ...}
     settings["icon"]: Optional[pg.Surface]
 
     def __init__(self, app):
@@ -923,16 +927,3 @@ class Tutorial(Game):
                         self.escape_message = False
                 elif case(pg.MOUSEBUTTONDOWN):
                     self.dialogue.update_stage()
-
-
-class Settings:
-    def __init__(self):
-        self.settings: Dict[str, Any] = {}
-
-    def set(self, setting: str, data):
-        self.settings[setting] = data
-
-    def get(self, setting: str):
-        if setting not in self.settings:
-            return None
-        return self.settings[setting]
